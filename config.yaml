@@ -1,0 +1,4 @@
+paths:
+  raw: data/raw
+  processed: data/processed
+  tmp: tmp
