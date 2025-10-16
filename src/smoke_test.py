@@ -1,19 +1,16 @@
 import sys, pathlib
-import cv2
-import mediapipe as mp
+import cv2, mediapipe as mp
 
 in_path = sys.argv[1] if len(sys.argv) > 1 else "data/raw/sample.mov"
-out_dir = pathlib.Path("tmp/frames")
-out_dir.mkdir(parents=True, exist_ok=True)
+out_dir = pathlib.Path("tmp/frames"); out_dir.mkdir(parents=True, exist_ok=True)
 
 cap = cv2.VideoCapture(in_path)
 if not cap.isOpened():
-    raise SystemExit(f"Could not open {in_path}. Put a short video there and re-run.")
+    raise SystemExit(f"Could not open {in_path}. Put a short clip there and re-run.")
 
-# fast selfie segmentation for silhouette
 with mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1) as seg:
-    count = 0
     ok, frame = cap.read()
+    count = 0
     while ok and count < 30:
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         res = seg.process(rgb)

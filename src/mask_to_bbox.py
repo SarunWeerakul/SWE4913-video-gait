@@ -19,7 +19,6 @@ for f,m in zip(frames, masks):
     mask = cv2.imread(str(m), cv2.IMREAD_GRAYSCALE)
     if mask is None:
         continue
-    # threshold just in case
     _,thr = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
     ys, xs = np.where(thr > 0)
     if xs.size == 0 or ys.size == 0:
