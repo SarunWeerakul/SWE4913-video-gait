@@ -6,6 +6,8 @@ Method 3: PosePipe (MediaPipe Pose Landmarker, multi-person)
 - Keeps only the most-moving person (walker) via motion filter
 """
 import sys, os, json, math, cv2, numpy as np
+import mediapipe as mp
+from mediapipe.tasks.python import vision as mp_vision  # keep this for PoseLandmarker, etc.
 from collections import defaultdict
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision as mp_vision
