@@ -1,6 +1,25 @@
-tmp/
+# macOS
+.DS_Store
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# virtual envs
+.venv/
+env/
+venv/
+
+# data and temp
+tmp/
 *.mp4
-*.tar.gz
 *.csv
-*.DS_Store
+*.tar.gz
+*.zip
+
+# system
+.idea/
+.vscode/
