@@ -91,7 +91,7 @@ def main():
         ts_ms = int((fidx/(fps if fps>0 else 1))*1000)
 
         rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-        mp_image = mp_vision.Image(image_format=mp_vision.ImageFormat.SRGB, data=rgb)
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
         result = landmarker.detect_for_video(mp_image, ts_ms)
 
         people=[]
