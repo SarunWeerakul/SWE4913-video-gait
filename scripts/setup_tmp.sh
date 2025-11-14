@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-set -e
-BASE="UNB-HTL-1001/BF/W1"
-METHODS=("method1-yolo" "method2-mediapipe" "method3-posepipe")
-CAMS=(1 2 3 4 5 6 7)
-for M in "${METHODS[@]}"; do
-  for C in "${CAMS[@]}"; do
-    mkdir -p "tmp/$BASE/$M/cam${C}/vis_${M#*-}"
-  done
+set -euo pipefail
+# Pre-create tmp tree for a given walk
+# Usage: scripts/setup_tmp.sh data/raw/UNB-HTL-1001/BF/W1
+WALK_DIR="${1:?WALK_DIR required}"
+SUBPATH="${WALK_DIR#data/raw/}"
+for m in method1_yolo method2_topdown method3_posepipe; do
+  mkdir -p "tmp/${SUBPATH}/${m}/vis"
 done
-echo "✅ Created tmp structure."
+echo "[OK] Created tmp/${SUBPATH}/{method*/vis}"
