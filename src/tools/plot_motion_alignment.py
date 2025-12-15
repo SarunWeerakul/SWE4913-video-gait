@@ -17,8 +17,13 @@ Usage (from project root):
 
 python src/tools/plot_motion_alignment.py \
   --csv1 path/to/cam1/motion_ankle.csv \
-  --csv2 path/to/cam2/motion_ankle.csv
+  --csv2 path/to/cam2/motion_ankle.csv \
+  --label1 cam1 \
+  --label2 cam4 \
+  --tmin 15000 \
+  --tmax 21000
 
+If --tmin/--tmax are omitted, the full time range is shown.
 Requires: numpy, matplotlib
 """
 
@@ -130,9 +135,18 @@ def compute_lag(
 
 # ---------- main plotting logic ----------
 
-def visualize_pair(csv1: str | Path, csv2: str | Path) -> None:
+def visualize_pair(
+    csv1: str | Path,
+    csv2: str | Path,
+    label1: str,
+    label2: str,
+    tmin: float | None,
+    tmax: float | None,
+) -> None:
     print(f"[plot_motion_alignment] csv1 = {csv1}")
     print(f"[plot_motion_alignment] csv2 = {csv2}")
+    if tmin is not None or tmax is not None:
+        print(f"[plot_motion_alignment] zoom window = [{tmin}, {tmax}] ms")
 
     t1, y1 = load_motion_csv(csv1)
     t2, y2 = load_motion_csv(csv2)
@@ -167,18 +181,20 @@ def visualize_pair(csv1: str | Path, csv2: str | Path) -> None:
 
     fig, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
-    axes[0].plot(t_grid, y1g, label="csv1 ankle_rel_norm")
-    axes[0].plot(t_grid, y2g, label="csv2 ankle_rel_norm", alpha=0.7)
+    # Panel 1: raw signals
+    axes[0].plot(t_grid, y1g, label=f"{label1} ankle_rel_norm")
+    axes[0].plot(t_grid, y2g, label=f"{label2} ankle_rel_norm", alpha=0.7)
     axes[0].set_ylabel("ankle_rel_norm")
     axes[0].set_title("Raw ankle_rel_norm vs time (ms)")
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
 
-    axes[1].plot(t_grid, y1g, label="csv1 (reference)")
+    # Panel 2: csv2 shifted by lag
+    axes[1].plot(t_grid, y1g, label=f"{label1} (reference)")
     axes[1].plot(
         t_grid,
         y2_shifted,
-        label=f"csv2 shifted by {lag_ms:.1f} ms",
+        label=f"{label2} shifted by {lag_ms:.1f} ms",
         alpha=0.7,
     )
     axes[1].set_xlabel("time (ms)")
@@ -186,6 +202,13 @@ def visualize_pair(csv1: str | Path, csv2: str | Path) -> None:
     axes[1].set_title("csv2 shifted to align with csv1")
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
+
+    # Optional zoom into a specific time window (in ms)
+    if tmin is not None or tmax is not None:
+        xmin = tmin if tmin is not None else t_grid.min()
+        xmax = tmax if tmax is not None else t_grid.max()
+        axes[0].set_xlim(xmin, xmax)
+        axes[1].set_xlim(xmin, xmax)
 
     fig.tight_layout()
     plt.show()
@@ -197,9 +220,30 @@ def main():
     )
     parser.add_argument("--csv1", required=True, help="First motion_ankle.csv (reference)")
     parser.add_argument("--csv2", required=True, help="Second motion_ankle.csv")
+    parser.add_argument("--label1", default="csv1", help="Label for the first signal")
+    parser.add_argument("--label2", default="csv2", help="Label for the second signal")
+    parser.add_argument(
+        "--tmin",
+        type=float,
+        default=None,
+        help="Optional start time (ms) for x-axis zoom",
+    )
+    parser.add_argument(
+        "--tmax",
+        type=float,
+        default=None,
+        help="Optional end time (ms) for x-axis zoom",
+    )
 
     args = parser.parse_args()
-    visualize_pair(args.csv1, args.csv2)
+    visualize_pair(
+        args.csv1,
+        args.csv2,
+        args.label1,
+        args.label2,
+        args.tmin,
+        args.tmax,
+    )
 
 
 if __name__ == "__main__":

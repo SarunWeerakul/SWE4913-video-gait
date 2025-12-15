@@ -19,7 +19,11 @@ python src/tools/plot_shank_alignment.py \
   --csv1 tmp/UNB-HTL-1001/BF/W1/method1_yolo/cam1/shank_angle.csv \
   --csv2 tmp/UNB-HTL-1001/BF/W1/method1_yolo/cam2/shank_angle.csv \
   --label1 cam1 \
-  --label2 cam2
+  --label2 cam2 \
+  --tmin 15000 \
+  --tmax 21000
+
+If --tmin/--tmax are omitted, the full time range is shown.
 """
 
 import argparse
@@ -130,9 +134,18 @@ def compute_lag(
 
 # ---------- main plotting logic ----------
 
-def visualize_pair(csv1: str | Path, csv2: str | Path, label1: str, label2: str) -> None:
+def visualize_pair(
+    csv1: str | Path,
+    csv2: str | Path,
+    label1: str,
+    label2: str,
+    tmin: float | None,
+    tmax: float | None,
+) -> None:
     print(f"[plot_shank_alignment] csv1 = {csv1}")
     print(f"[plot_shank_alignment] csv2 = {csv2}")
+    if tmin is not None or tmax is not None:
+        print(f"[plot_shank_alignment] zoom window = [{tmin}, {tmax}] ms")
 
     t1, y1 = load_angle_csv(csv1)
     t2, y2 = load_angle_csv(csv2)
@@ -196,6 +209,13 @@ def visualize_pair(csv1: str | Path, csv2: str | Path, label1: str, label2: str)
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
 
+    # Optional zoom into a specific time window (in ms)
+    if tmin is not None or tmax is not None:
+        xmin = tmin if tmin is not None else t_grid.min()
+        xmax = tmax if tmax is not None else t_grid.max()
+        axes[0].set_xlim(xmin, xmax)
+        axes[1].set_xlim(xmin, xmax)
+
     fig.tight_layout()
     plt.show()
 
@@ -208,9 +228,28 @@ def main():
     parser.add_argument("--csv2", required=True, help="shank_angle.csv for camera 2")
     parser.add_argument("--label1", default="cam1", help="Label for camera 1")
     parser.add_argument("--label2", default="cam2", help="Label for camera 2")
+    parser.add_argument(
+        "--tmin",
+        type=float,
+        default=None,
+        help="Optional start time (ms) for x-axis zoom",
+    )
+    parser.add_argument(
+        "--tmax",
+        type=float,
+        default=None,
+        help="Optional end time (ms) for x-axis zoom",
+    )
 
     args = parser.parse_args()
-    visualize_pair(args.csv1, args.csv2, args.label1, args.label2)
+    visualize_pair(
+        args.csv1,
+        args.csv2,
+        args.label1,
+        args.label2,
+        args.tmin,
+        args.tmax,
+    )
 
 
 if __name__ == "__main__":
